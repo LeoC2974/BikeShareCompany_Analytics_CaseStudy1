@@ -17,7 +17,7 @@ library(tidyverse)  #helps wrangle data
 library(lubridate)  #helps wrangle date attributes
 library(ggplot2)  #helps visualize data
 getwd() #displays your working directory
-#setwd
+#setwd to where raw data files are
 
 
 # STEP 1: COLLECT DATA
@@ -57,8 +57,6 @@ colnames(apr_2023)
 
 # Inspect the dataframes and look for incongruencies
 
-months <- c(may_2022,jun_2022,jul_2022,aug_2022,sep_2022,oct_2022,nov_2022,dec_2022,jan_2023,feb_2023,mar_2023,apr_2023)
-
 str(may_2022)
 str(apr_2023)
 #Datatypes for columns are consistent across all the months
@@ -90,7 +88,7 @@ summary(all_trips)  #Statistical summary of data. Mainly for numerics
 
 
 # Check to make sure the proper number of observations were reassigned
-table(all_trips$member_casual)
+table(all_trips_v2$member_casual)
 
 # Add columns that list the date, month, day, and year of each ride
 # This will allow us to aggregate ride data for each month, day, or year ... before completing these operations we could only aggregate at the ride level
@@ -187,10 +185,11 @@ all_trips_v2 %>%
   summarise(number_of_rides = n()
             ,average_duration = mean(ride_length)) %>%
   arrange(member_casual, weekday) %>%
-  ggplot(aes(x=member_casual, y=average_duration, fill = member_casual)) +
+  ggplot(aes(x=member_casual, y=average_duration/60, fill = member_casual)) +
   geom_col(position = "dodge") +
   theme(legend.position = "none") +
-  labs(x= "Membership Type", y = "Average Ride Duration", title = "Average Ride Duration by
+  labs(x= "Membership Type", y = "Average Ride Duration
+  (minutes)", title = "Average Ride Duration by
 Membership Type") +
   scale_x_discrete(label= c("Casual", "Annual"))
 
@@ -222,14 +221,3 @@ all_trips_v2 %>%
   labs(x= "Day of Week", y= "Average Ride Duration
   (minutes)", title = "Ride Duration per Day by 
        Customer Type")
-
-#=================================================
-# STEP 5: EXPORT SUMMARY FILE FOR FURTHER ANALYSIS
-#=================================================
-# Create a csv file that we will visualize in Excel, Tableau, or my presentation software
-# N.B.: This file location is for a Mac. If you are working on a PC, change the file location accordingly (most likely "C:\Users\YOUR_USERNAME\Desktop\...") to export the data. You can read more here: https://datatofish.com/export-dataframe-to-csv-in-r/
-counts <- aggregate(all_trips_v2$ride_length ~ all_trips_v2$member_casual + all_trips_v2$day_of_week, FUN = mean)
-write.csv(counts, file = 'avg_ride_length.csv')
-
-#You're done! Congratulations!
-
